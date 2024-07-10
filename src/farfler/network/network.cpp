@@ -19,6 +19,7 @@ Network::Network(boost::asio::io_context& io_context, const std::string& name)
       tcp_acceptor_(io_context),
       cycle_discovery_messages_timer_(io_context),
       id_(GenerateId()),
+      pubsub_(),
       strand_(io_context) {
   InitializeUdpSocket();
   InitializeTcpAcceptor();
@@ -271,6 +272,8 @@ void Network::ProcessTcpMessage(
     HandleTcpPing(mutable_packet, socket);
   } else if (message_type == "tcp_pong") {
     HandleTcpPong(mutable_packet, socket);
+  } else if (message_type == "publication") {
+    HandlePublication(mutable_packet);
   }
 }
 
@@ -288,6 +291,7 @@ void Network::HandleTcpPing(
   pong_msg.udp_port_ = udp_socket_.local_endpoint().port();
   pong_msg.tcp_address_ = tcp_acceptor_.local_endpoint().address().to_string();
   pong_msg.tcp_port_ = tcp_acceptor_.local_endpoint().port();
+  pong_msg.subscribed_topics_ = pubsub_.GetOnlineSubscribedTopics();
 
   SendTcpMessage(socket, TcpPong::Serialize(pong_msg));
 }
@@ -300,6 +304,8 @@ void Network::HandleTcpPong(
   std::cout << "Received tcp_pong from " << msg.id_ << " " << msg.name_
             << std::endl;
 
+  UpdatePeerSubscriptions(msg.id_, msg.subscribed_topics_);
+
   {
     std::lock_guard<std::mutex> lock(tcp_sockets_mutex_);
     connecting_tcp_sockets_[msg.id_] = socket;
@@ -308,6 +314,23 @@ void Network::HandleTcpPong(
 
   std::cout << "Verified tcp sockets: " << connecting_tcp_sockets_.size()
             << std::endl;
+}
+
+void Network::HandlePublication(std::vector<char>& packet) {
+  std::string topic = String::Deserialize(packet);
+  uint32_t message_size;
+  UInt32::Deserialize(packet, message_size);
+  std::vector<char> message(packet.begin(), packet.begin() + message_size);
+  pubsub_.PublishOnline(topic, message);
+}
+
+void Network::UpdatePeerSubscriptions(const std::string& peer_id,
+                                      const std::vector<std::string>& topics) {
+  std::cout << "Updating subscriptions for peer " << peer_id << ":"
+            << std::endl;
+  for (const auto& topic : topics) {
+    std::cout << "  " << topic << std::endl;
+  }
 }
 
 void Network::SendTcpPing(
@@ -319,6 +342,7 @@ void Network::SendTcpPing(
   ping.udp_port_ = udp_socket_.local_endpoint().port();
   ping.tcp_address_ = tcp_acceptor_.local_endpoint().address().to_string();
   ping.tcp_port_ = tcp_acceptor_.local_endpoint().port();
+  ping.subscribed_topics_ = pubsub_.GetOnlineSubscribedTopics();
   std::vector<char> packet = TcpPing::Serialize(ping);
 
   SendTcpMessage(socket, packet);
@@ -343,6 +367,56 @@ void Network::SendTcpMessage(
               HandleTcpError(socket, error);
             }
           }));
+}
+
+void Network::SendPublication(
+    std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    const std::string& topic, const std::vector<char>& message) {
+  std::vector<char> packet;
+  String::Serialize("publication", packet);
+  String::Serialize(topic, packet);
+  UInt32::Serialize(message.size(), packet);
+  packet.insert(packet.end(), message.begin(), message.end());
+
+  SendTcpMessage(socket, packet);
+}
+
+void Network::BroadcastSubscriptionUpdate() {
+  TcpPing ping;
+  ping.id_ = id_;
+  ping.name_ = name_;
+  ping.udp_address_ = udp_socket_.local_endpoint().address().to_string();
+  ping.udp_port_ = udp_socket_.local_endpoint().port();
+  ping.tcp_address_ = tcp_acceptor_.local_endpoint().address().to_string();
+  ping.tcp_port_ = tcp_acceptor_.local_endpoint().port();
+  ping.subscribed_topics_ = pubsub_.GetOnlineSubscribedTopics();
+
+  std::vector<char> packet = TcpPing::Serialize(ping);
+
+  std::lock_guard<std::mutex> lock(tcp_sockets_mutex_);
+  for (const auto& [id, socket] : connecting_tcp_sockets_) {
+    SendTcpMessage(socket, packet);
+  }
+}
+
+void Network::UnsubscribeOffline(const std::string& topic,
+                                 const Subscription& subscription) {
+  std::lock_guard<std::mutex> lock(pubsub_mutex_);
+  pubsub_.UnsubscribeOffline(topic, subscription);
+}
+
+void Network::UnsubscribeOnline(const std::string& topic,
+                                const Subscription& subscription) {
+  std::lock_guard<std::mutex> lock(pubsub_mutex_);
+  pubsub_.UnsubscribeOnline(topic, subscription);
+  BroadcastSubscriptionUpdate();
+}
+
+void Network::UnsubscribeAll(const std::string& topic,
+                             const Subscription& subscription) {
+  std::lock_guard<std::mutex> lock(pubsub_mutex_);
+  pubsub_.UnsubscribeAll(topic, subscription);
+  BroadcastSubscriptionUpdate();
 }
 
 }  // namespace farfler::network
