@@ -21,6 +21,11 @@ Network::Network(boost::asio::io_context& io_context, const std::string& name)
       id_(GenerateId()),
       pubsub_(),
       strand_(io_context) {
+  if (!instance) {
+    instance = std::unique_ptr<Network>(new Network(io_context_, name_, true));
+    return;
+  }
+
   InitializeUdpSocket();
   InitializeTcpAcceptor();
   StartReceivingUdpMessages();
@@ -399,10 +404,30 @@ void Network::BroadcastSubscriptionUpdate() {
   }
 }
 
+void Network::UnsubscribeOffline(const std::string& topic,
+                                 const Subscription& subscription) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  UnsubscribeOffline(*instance, topic, subscription);
+}
+
 void Network::UnsubscribeOffline(Network& network, const std::string& topic,
                                  const Subscription& subscription) {
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
   network.pubsub_.UnsubscribeOffline(topic, subscription);
+}
+
+void Network::UnsubscribeOnline(const std::string& topic,
+                                const Subscription& subscription) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  UnsubscribeOnline(*instance, topic, subscription);
 }
 
 void Network::UnsubscribeOnline(Network& network, const std::string& topic,
@@ -412,11 +437,41 @@ void Network::UnsubscribeOnline(Network& network, const std::string& topic,
   network.BroadcastSubscriptionUpdate();
 }
 
+void Network::UnsubscribeAll(const std::string& topic,
+                             const Subscription& subscription) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  UnsubscribeAll(*instance, topic, subscription);
+}
+
 void Network::UnsubscribeAll(Network& network, const std::string& topic,
                              const Subscription& subscription) {
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
   network.pubsub_.UnsubscribeAll(topic, subscription);
   network.BroadcastSubscriptionUpdate();
 }
+
+Network::Network(boost::asio::io_context& io_context, const std::string& name,
+                 bool)
+    : io_context_(io_context),
+      name_(name),
+      udp_socket_(io_context),
+      tcp_acceptor_(io_context),
+      cycle_discovery_messages_timer_(io_context),
+      id_(GenerateId()),
+      pubsub_(),
+      strand_(io_context) {
+  std::cout << "Initialized down here" << std::endl;
+  InitializeUdpSocket();
+  InitializeTcpAcceptor();
+  StartReceivingUdpMessages();
+  StartAcceptingTcpConnections();
+  StartCyclingDiscoveryMessages();
+}
+
+std::unique_ptr<Network> Network::instance = nullptr;
 
 }  // namespace farfler::network

@@ -1,11 +1,31 @@
 namespace farfler::network {
 
 template <typename T>
+void Network::PublishOffline(const std::string& topic, const T& message) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  PublishOffline(*instance, topic, message);
+}
+
+template <typename T>
 void Network::PublishOffline(Network& network, const std::string& topic,
                              const T& message) {
   std::vector<char> serialized = T::Serialize(message);
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
   network.pubsub_.PublishOffline(topic, serialized);
+}
+
+template <typename T>
+void Network::PublishOnline(const std::string& topic, const T& message) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  PublishOnline(*instance, topic, message);
 }
 
 template <typename T>
@@ -16,6 +36,16 @@ void Network::PublishOnline(Network& network, const std::string& topic,
   for (const auto& [id, socket] : network.connecting_tcp_sockets_) {
     network.SendPublication(socket, topic, serialized);
   }
+}
+
+template <typename T>
+void Network::PublishAll(const std::string& topic, const T& message) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return;
+  }
+
+  PublishAll(*instance, topic, message);
 }
 
 template <typename T>
@@ -72,6 +102,17 @@ Subscription Network::SubscribeAllImpl(Network& network,
 }
 
 template <typename Callback>
+Subscription Network::SubscribeOffline(const std::string& topic,
+                                       Callback callback) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return Subscription();
+  }
+
+  return SubscribeOffline(*instance, topic, callback);
+}
+
+template <typename Callback>
 Subscription Network::SubscribeOffline(Network& network,
                                        const std::string& topic,
                                        Callback callback) {
@@ -79,10 +120,32 @@ Subscription Network::SubscribeOffline(Network& network,
 }
 
 template <typename Callback>
+Subscription Network::SubscribeOnline(const std::string& topic,
+                                      Callback callback) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return Subscription();
+  }
+
+  return SubscribeOnline(*instance, topic, callback);
+}
+
+template <typename Callback>
 Subscription Network::SubscribeOnline(Network& network,
                                       const std::string& topic,
                                       Callback callback) {
   return SubscribeOnlineImpl(network, topic, callback, &Callback::operator());
+}
+
+template <typename Callback>
+Subscription Network::SubscribeAll(const std::string& topic,
+                                   Callback callback) {
+  if (!instance) {
+    std::cout << "Intialize a network instance first" << std::endl;
+    return Subscription();
+  }
+
+  return SubscribeAll(*instance, topic, callback);
 }
 
 template <typename Callback>

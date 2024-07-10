@@ -5,6 +5,7 @@
 #include <farfler/network/pingpong.hpp>
 #include <farfler/network/pubsub.hpp>
 #include <farfler/network/types.hpp>
+#include <iostream>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -17,16 +18,29 @@ class Network {
   Network(boost::asio::io_context& io_context, const std::string& name);
 
   template <typename T>
+  static void PublishOffline(const std::string& topic, const T& message);
+
+  template <typename T>
   static void PublishOffline(Network& network, const std::string& topic,
                              const T& message);
+
+  template <typename T>
+  static void PublishOnline(const std::string& topic, const T& message);
 
   template <typename T>
   static void PublishOnline(Network& network, const std::string& topic,
                             const T& message);
 
   template <typename T>
+  static void PublishAll(const std::string& topic, const T& message);
+
+  template <typename T>
   static void PublishAll(Network& network, const std::string& topic,
                          const T& message);
+
+  template <typename Callback>
+  static Subscription SubscribeOffline(const std::string& topic,
+                                       Callback callback);
 
   template <typename Callback>
   static Subscription SubscribeOffline(Network& network,
@@ -34,18 +48,36 @@ class Network {
                                        Callback callback);
 
   template <typename Callback>
+  static Subscription SubscribeOnline(const std::string& topic,
+                                      Callback callback);
+
+  template <typename Callback>
   static Subscription SubscribeOnline(Network& network,
                                       const std::string& topic,
                                       Callback callback);
 
   template <typename Callback>
+  static Subscription SubscribeAll(const std::string& topic, Callback callback);
+
+  template <typename Callback>
   static Subscription SubscribeAll(Network& network, const std::string& topic,
                                    Callback callback);
 
+  static void UnsubscribeOffline(const std::string& topic,
+                                 const Subscription& subscription);
+
   static void UnsubscribeOffline(Network& network, const std::string& topic,
                                  const Subscription& subscription);
+
+  static void UnsubscribeOnline(const std::string& topic,
+                                const Subscription& subscription);
+
   static void UnsubscribeOnline(Network& network, const std::string& topic,
                                 const Subscription& subscription);
+
+  static void UnsubscribeAll(const std::string& topic,
+                             const Subscription& subscription);
+
   static void UnsubscribeAll(Network& network, const std::string& topic,
                              const Subscription& subscription);
 
@@ -99,6 +131,8 @@ class Network {
                                        Callback callback,
                                        void (Callback::*)(const T&) const);
 
+  Network(boost::asio::io_context& io_context, const std::string& name, bool);
+
   boost::asio::io_context& io_context_;
   boost::asio::ip::udp::socket udp_socket_;
   boost::asio::ip::tcp::acceptor tcp_acceptor_;
@@ -115,6 +149,7 @@ class Network {
   std::mutex tcp_sockets_mutex_;
   std::mutex pubsub_mutex_;
   boost::asio::io_context::strand strand_;
+  static std::unique_ptr<Network> instance;
 };
 
 }  // namespace farfler::network
