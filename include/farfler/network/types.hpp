@@ -15,7 +15,7 @@ class Number {
   static T Deserialize(std::vector<char>& packet);
   static T Deserialize(std::vector<char>& packet, T& msg);
 
-  T value_;
+  T value;
 };
 
 using Int8 = Number<int8_t>;
@@ -39,7 +39,7 @@ class String {
   static std::string Deserialize(std::vector<char>& packet);
   static std::string Deserialize(std::vector<char>& packet, std::string& msg);
 
-  std::string value_;
+  std::string value;
 };
 
 class Vector2 {
@@ -51,7 +51,7 @@ class Vector2 {
   static Vector2 Deserialize(std::vector<char>& packet);
   static Vector2 Deserialize(std::vector<char>& packet, Vector2& msg);
 
-  float x_, y_;
+  float x, y;
 };
 
 class Vector3 {
@@ -63,7 +63,7 @@ class Vector3 {
   static Vector3 Deserialize(std::vector<char>& packet);
   static Vector3 Deserialize(std::vector<char>& packet, Vector3& msg);
 
-  float x_, y_, z_;
+  float x, y, z;
 };
 
 class Coordinate {
@@ -75,7 +75,7 @@ class Coordinate {
   static Coordinate Deserialize(std::vector<char>& packet);
   static Coordinate Deserialize(std::vector<char>& packet, Coordinate& msg);
 
-  double latitude_, longitude_;
+  double latitude, longitude;
 };
 
 }  // namespace farfler::network
