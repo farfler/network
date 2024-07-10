@@ -42,4 +42,40 @@ class String {
   std::string value_;
 };
 
+class Vector2 {
+ public:
+  Vector2(float x = 0, float y = 0);
+  static std::vector<char> Serialize(const Vector2& msg);
+  static std::vector<char> Serialize(const Vector2& msg,
+                                     std::vector<char>& packet);
+  static Vector2 Deserialize(std::vector<char>& packet);
+  static Vector2 Deserialize(std::vector<char>& packet, Vector2& msg);
+
+  float x_, y_;
+};
+
+class Vector3 {
+ public:
+  Vector3(float x = 0, float y = 0, float z = 0);
+  static std::vector<char> Serialize(const Vector3& msg);
+  static std::vector<char> Serialize(const Vector3& msg,
+                                     std::vector<char>& packet);
+  static Vector3 Deserialize(std::vector<char>& packet);
+  static Vector3 Deserialize(std::vector<char>& packet, Vector3& msg);
+
+  float x_, y_, z_;
+};
+
+class Coordinate {
+ public:
+  Coordinate(double latitude = 0, double longitude = 0);
+  static std::vector<char> Serialize(const Coordinate& msg);
+  static std::vector<char> Serialize(const Coordinate& msg,
+                                     std::vector<char>& packet);
+  static Coordinate Deserialize(std::vector<char>& packet);
+  static Coordinate Deserialize(std::vector<char>& packet, Coordinate& msg);
+
+  double latitude_, longitude_;
+};
+
 }  // namespace farfler::network
