@@ -9,11 +9,13 @@ namespace farfler::network {
 template <typename T>
 class Number {
  public:
-  explicit Number(T value = 0);
+  Number(T value = 0);
   static std::vector<char> Serialize(const T& msg);
   static std::vector<char> Serialize(const T& msg, std::vector<char>& packet);
   static T Deserialize(std::vector<char>& packet);
   static T Deserialize(std::vector<char>& packet, T& msg);
+
+  operator T() const;
 
   T value;
 };
@@ -32,12 +34,14 @@ using Boolean = Number<bool>;
 
 class String {
  public:
-  explicit String(const std::string& value = "");
+  String(const std::string& value = "");
   static std::vector<char> Serialize(const std::string& msg);
   static std::vector<char> Serialize(const std::string& msg,
                                      std::vector<char>& packet);
   static std::string Deserialize(std::vector<char>& packet);
   static std::string Deserialize(std::vector<char>& packet, std::string& msg);
+
+  operator std::string() const;
 
   std::string value;
 };

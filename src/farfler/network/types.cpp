@@ -35,6 +35,11 @@ T Number<T>::Deserialize(std::vector<char>& packet, T& msg) {
   return msg;
 }
 
+template <typename T>
+Number<T>::operator T() const {
+    return value;
+}
+
 template class Number<int8_t>;
 template class Number<int16_t>;
 template class Number<int32_t>;
@@ -73,6 +78,10 @@ std::string String::Deserialize(std::vector<char>& packet, std::string& msg) {
   msg = std::string(packet.begin(), packet.begin() + size);
   packet.erase(packet.begin(), packet.begin() + size);
   return msg;
+}
+
+String::operator std::string() const {
+    return value;
 }
 
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
