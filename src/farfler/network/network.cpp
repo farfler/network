@@ -399,24 +399,24 @@ void Network::BroadcastSubscriptionUpdate() {
   }
 }
 
-void Network::UnsubscribeOffline(const std::string& topic,
+void Network::UnsubscribeOffline(Network& network, const std::string& topic,
                                  const Subscription& subscription) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  pubsub_.UnsubscribeOffline(topic, subscription);
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  network.pubsub_.UnsubscribeOffline(topic, subscription);
 }
 
-void Network::UnsubscribeOnline(const std::string& topic,
+void Network::UnsubscribeOnline(Network& network, const std::string& topic,
                                 const Subscription& subscription) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  pubsub_.UnsubscribeOnline(topic, subscription);
-  BroadcastSubscriptionUpdate();
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  network.pubsub_.UnsubscribeOnline(topic, subscription);
+  network.BroadcastSubscriptionUpdate();
 }
 
-void Network::UnsubscribeAll(const std::string& topic,
+void Network::UnsubscribeAll(Network& network, const std::string& topic,
                              const Subscription& subscription) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  pubsub_.UnsubscribeAll(topic, subscription);
-  BroadcastSubscriptionUpdate();
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  network.pubsub_.UnsubscribeAll(topic, subscription);
+  network.BroadcastSubscriptionUpdate();
 }
 
 }  // namespace farfler::network

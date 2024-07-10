@@ -17,29 +17,37 @@ class Network {
   Network(boost::asio::io_context& io_context, const std::string& name);
 
   template <typename T>
-  void PublishOffline(const std::string& topic, const T& message);
+  static void PublishOffline(Network& network, const std::string& topic,
+                             const T& message);
 
   template <typename T>
-  void PublishOnline(const std::string& topic, const T& message);
+  static void PublishOnline(Network& network, const std::string& topic,
+                            const T& message);
 
   template <typename T>
-  void PublishAll(const std::string& topic, const T& message);
+  static void PublishAll(Network& network, const std::string& topic,
+                         const T& message);
 
   template <typename Callback>
-  Subscription SubscribeOffline(const std::string& topic, Callback callback);
+  static Subscription SubscribeOffline(Network& network,
+                                       const std::string& topic,
+                                       Callback callback);
 
   template <typename Callback>
-  Subscription SubscribeOnline(const std::string& topic, Callback callback);
+  static Subscription SubscribeOnline(Network& network,
+                                      const std::string& topic,
+                                      Callback callback);
 
   template <typename Callback>
-  Subscription SubscribeAll(const std::string& topic, Callback callback);
+  static Subscription SubscribeAll(Network& network, const std::string& topic,
+                                   Callback callback);
 
-  void UnsubscribeOffline(const std::string& topic,
-                          const Subscription& subscription);
-  void UnsubscribeOnline(const std::string& topic,
-                         const Subscription& subscription);
-  void UnsubscribeAll(const std::string& topic,
-                      const Subscription& subscription);
+  static void UnsubscribeOffline(Network& network, const std::string& topic,
+                                 const Subscription& subscription);
+  static void UnsubscribeOnline(Network& network, const std::string& topic,
+                                const Subscription& subscription);
+  static void UnsubscribeAll(Network& network, const std::string& topic,
+                             const Subscription& subscription);
 
  private:
   void InitializeUdpSocket();
@@ -74,16 +82,22 @@ class Network {
   void BroadcastSubscriptionUpdate();
 
   template <typename Callback, typename T>
-  Subscription SubscribeOfflineImpl(const std::string& topic, Callback callback,
-                                    void (Callback::*)(const T&) const);
+  static Subscription SubscribeOfflineImpl(Network& network,
+                                           const std::string& topic,
+                                           Callback callback,
+                                           void (Callback::*)(const T&) const);
 
   template <typename Callback, typename T>
-  Subscription SubscribeOnlineImpl(const std::string& topic, Callback callback,
-                                   void (Callback::*)(const T&) const);
+  static Subscription SubscribeOnlineImpl(Network& network,
+                                          const std::string& topic,
+                                          Callback callback,
+                                          void (Callback::*)(const T&) const);
 
   template <typename Callback, typename T>
-  Subscription SubscribeAllImpl(const std::string& topic, Callback callback,
-                                void (Callback::*)(const T&) const);
+  static Subscription SubscribeAllImpl(Network& network,
+                                       const std::string& topic,
+                                       Callback callback,
+                                       void (Callback::*)(const T&) const);
 
   boost::asio::io_context& io_context_;
   boost::asio::ip::udp::socket udp_socket_;

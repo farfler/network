@@ -1,33 +1,37 @@
 namespace farfler::network {
 
 template <typename T>
-void Network::PublishOffline(const std::string& topic, const T& message) {
+void Network::PublishOffline(Network& network, const std::string& topic,
+                             const T& message) {
   std::vector<char> serialized = T::Serialize(message);
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  pubsub_.PublishOffline(topic, serialized);
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  network.pubsub_.PublishOffline(topic, serialized);
 }
 
 template <typename T>
-void Network::PublishOnline(const std::string& topic, const T& message) {
+void Network::PublishOnline(Network& network, const std::string& topic,
+                            const T& message) {
   std::vector<char> serialized = T::Serialize(message);
-  std::lock_guard<std::mutex> lock(tcp_sockets_mutex_);
-  for (const auto& [id, socket] : connecting_tcp_sockets_) {
-    SendPublication(socket, topic, serialized);
+  std::lock_guard<std::mutex> lock(network.tcp_sockets_mutex_);
+  for (const auto& [id, socket] : network.connecting_tcp_sockets_) {
+    network.SendPublication(socket, topic, serialized);
   }
 }
 
 template <typename T>
-void Network::PublishAll(const std::string& topic, const T& message) {
-  PublishOffline<T>(topic, message);
-  PublishOnline<T>(topic, message);
+void Network::PublishAll(Network& network, const std::string& topic,
+                         const T& message) {
+  PublishOffline<T>(network, topic, message);
+  PublishOnline<T>(network, topic, message);
 }
 
 template <typename Callback, typename T>
-Subscription Network::SubscribeOfflineImpl(const std::string& topic,
+Subscription Network::SubscribeOfflineImpl(Network& network,
+                                           const std::string& topic,
                                            Callback callback,
                                            void (Callback::*)(const T&) const) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  return pubsub_.SubscribeOffline(
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  return network.pubsub_.SubscribeOffline(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
         T deserialized = T::Deserialize(mutable_serialized);
@@ -36,51 +40,55 @@ Subscription Network::SubscribeOfflineImpl(const std::string& topic,
 }
 
 template <typename Callback, typename T>
-Subscription Network::SubscribeOnlineImpl(const std::string& topic,
+Subscription Network::SubscribeOnlineImpl(Network& network,
+                                          const std::string& topic,
                                           Callback callback,
                                           void (Callback::*)(const T&) const) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  Subscription subscription = pubsub_.SubscribeOnline(
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  Subscription subscription = network.pubsub_.SubscribeOnline(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
         T deserialized = T::Deserialize(mutable_serialized);
         callback(deserialized);
       });
-  BroadcastSubscriptionUpdate();
+  network.BroadcastSubscriptionUpdate();
   return subscription;
 }
 
 template <typename Callback, typename T>
-Subscription Network::SubscribeAllImpl(const std::string& topic,
+Subscription Network::SubscribeAllImpl(Network& network,
+                                       const std::string& topic,
                                        Callback callback,
                                        void (Callback::*)(const T&) const) {
-  std::lock_guard<std::mutex> lock(pubsub_mutex_);
-  Subscription subscription = pubsub_.SubscribeAll(
+  std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
+  Subscription subscription = network.pubsub_.SubscribeAll(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
         T deserialized = T::Deserialize(mutable_serialized);
         callback(deserialized);
       });
-  BroadcastSubscriptionUpdate();
+  network.BroadcastSubscriptionUpdate();
   return subscription;
 }
 
 template <typename Callback>
-Subscription Network::SubscribeOffline(const std::string& topic,
+Subscription Network::SubscribeOffline(Network& network,
+                                       const std::string& topic,
                                        Callback callback) {
-  return SubscribeOfflineImpl(topic, callback, &Callback::operator());
+  return SubscribeOfflineImpl(network, topic, callback, &Callback::operator());
 }
 
 template <typename Callback>
-Subscription Network::SubscribeOnline(const std::string& topic,
+Subscription Network::SubscribeOnline(Network& network,
+                                      const std::string& topic,
                                       Callback callback) {
-  return SubscribeOnlineImpl(topic, callback, &Callback::operator());
+  return SubscribeOnlineImpl(network, topic, callback, &Callback::operator());
 }
 
 template <typename Callback>
-Subscription Network::SubscribeAll(const std::string& topic,
+Subscription Network::SubscribeAll(Network& network, const std::string& topic,
                                    Callback callback) {
-  return SubscribeAllImpl(topic, callback, &Callback::operator());
+  return SubscribeAllImpl(network, topic, callback, &Callback::operator());
 }
 
 }  // namespace farfler::network
