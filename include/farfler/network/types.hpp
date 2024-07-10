@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace farfler::network {
@@ -28,5 +29,17 @@ using UInt64 = Number<uint64_t>;
 using Float32 = Number<float>;
 using Float64 = Number<double>;
 using Boolean = Number<bool>;
+
+class String {
+ public:
+  explicit String(const std::string& value = "");
+  static std::vector<char> Serialize(const std::string& msg);
+  static std::vector<char> Serialize(const std::string& msg,
+                                     std::vector<char>& packet);
+  static std::string Deserialize(std::vector<char>& packet);
+  static std::string Deserialize(std::vector<char>& packet, std::string& msg);
+
+  std::string value_;
+};
 
 }  // namespace farfler::network

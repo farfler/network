@@ -47,4 +47,32 @@ template class Number<float>;
 template class Number<double>;
 template class Number<bool>;
 
+String::String(const std::string &value) : value_(value) {}
+
+std::vector<char> String::Serialize(const std::string &msg) {
+  std::vector<char> packet;
+  Serialize(msg, packet);
+  return packet;
+}
+
+std::vector<char> String::Serialize(const std::string &msg,
+                                    std::vector<char> &packet) {
+  UInt32::Serialize(msg.size(), packet);
+  packet.insert(packet.end(), msg.begin(), msg.end());
+  return packet;
+}
+
+std::string String::Deserialize(std::vector<char> &packet) {
+  std::string msg;
+  Deserialize(packet, msg);
+  return msg;
+}
+
+std::string String::Deserialize(std::vector<char> &packet, std::string &msg) {
+  uint32_t size = UInt32::Deserialize(packet);
+  msg = std::string(packet.begin(), packet.begin() + size);
+  packet.erase(packet.begin(), packet.begin() + size);
+  return msg;
+}
+
 }  // namespace farfler::network
