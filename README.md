@@ -42,6 +42,18 @@ Network::SubscribeOffline("position", [](const Vector3 &message) {
 });
 ```
 
+<h2 id="publishing">Publishing</h2>
+
+Similarly, you can publish messages to all subscribed nodes with `Publish`, specifically to remote nodes with `PublishOnline`, or only to the local node with `PublishOffline`.
+
+```cxx
+Network::Publish("temperature", 22.5);
+
+Network::PublishOnline("status", true);
+
+Network::PublishOffline("position", Vector3(1.0, 2.0, 3.0));
+```
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
 </p>
