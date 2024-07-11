@@ -32,7 +32,7 @@ void PubSub::PublishOnline(const std::string& topic,
   }
 }
 
-void PubSub::UnsubscribeAll(const std::string& topic,
+void PubSub::Unsubscribe(const std::string& topic,
                             const Subscription& subscription) {
   std::lock_guard<std::mutex> lock(mutex_);
   offline_subscribers_[topic].erase(subscription.id_);

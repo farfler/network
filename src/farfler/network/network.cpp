@@ -437,20 +437,20 @@ void Network::UnsubscribeOnline(Network& network, const std::string& topic,
   network.BroadcastSubscriptionUpdate();
 }
 
-void Network::UnsubscribeAll(const std::string& topic,
+void Network::Unsubscribe(const std::string& topic,
                              const Subscription& subscription) {
   if (!instance) {
     std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
-  UnsubscribeAll(*instance, topic, subscription);
+  Unsubscribe(*instance, topic, subscription);
 }
 
-void Network::UnsubscribeAll(Network& network, const std::string& topic,
+void Network::Unsubscribe(Network& network, const std::string& topic,
                              const Subscription& subscription) {
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
-  network.pubsub_.UnsubscribeAll(topic, subscription);
+  network.pubsub_.Unsubscribe(topic, subscription);
   network.BroadcastSubscriptionUpdate();
 }
 

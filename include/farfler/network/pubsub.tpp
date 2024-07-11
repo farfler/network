@@ -19,7 +19,7 @@ Subscription PubSub::SubscribeOnline(const std::string &topic,
 }
 
 template <typename Callback>
-Subscription PubSub::SubscribeAll(const std::string &topic, Callback callback) {
+Subscription PubSub::Subscribe(const std::string &topic, Callback callback) {
   std::lock_guard<std::mutex> lock(mutex_);
   std::string id = GenerateSubscriptionId();
   offline_subscribers_[topic][id] = callback;

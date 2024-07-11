@@ -36,9 +36,9 @@ class PubSub {
                      const std::vector<char>& message);
 
   template <typename Callback>
-  Subscription SubscribeAll(const std::string& topic, Callback callback);
+  Subscription Subscribe(const std::string& topic, Callback callback);
 
-  void UnsubscribeAll(const std::string& topic,
+  void Unsubscribe(const std::string& topic,
                       const Subscription& subscription);
 
   std::vector<std::string> GetOnlineSubscribedTopics() const;

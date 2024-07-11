@@ -39,17 +39,17 @@ void Network::PublishOnline(Network& network, const std::string& topic,
 }
 
 template <typename T>
-void Network::PublishAll(const std::string& topic, const T& message) {
+void Network::Publish(const std::string& topic, const T& message) {
   if (!instance) {
     std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
-  PublishAll(*instance, topic, message);
+  Publish(*instance, topic, message);
 }
 
 template <typename T>
-void Network::PublishAll(Network& network, const std::string& topic,
+void Network::Publish(Network& network, const std::string& topic,
                          const T& message) {
   PublishOffline<T>(network, topic, message);
   PublishOnline<T>(network, topic, message);
@@ -91,7 +91,7 @@ Subscription Network::SubscribeAllImpl(Network& network,
                                        Callback callback,
                                        void (Callback::*)(const T&) const) {
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
-  Subscription subscription = network.pubsub_.SubscribeAll(
+  Subscription subscription = network.pubsub_.Subscribe(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
         T deserialized = Deserialize<T>(mutable_serialized);
@@ -138,18 +138,18 @@ Subscription Network::SubscribeOnline(Network& network,
 }
 
 template <typename Callback>
-Subscription Network::SubscribeAll(const std::string& topic,
+Subscription Network::Subscribe(const std::string& topic,
                                    Callback callback) {
   if (!instance) {
     std::cout << "Initialize a network instance first" << std::endl;
     return Subscription();
   }
 
-  return SubscribeAll(*instance, topic, callback);
+  return Subscribe(*instance, topic, callback);
 }
 
 template <typename Callback>
-Subscription Network::SubscribeAll(Network& network, const std::string& topic,
+Subscription Network::Subscribe(Network& network, const std::string& topic,
                                    Callback callback) {
   return SubscribeAllImpl(network, topic, callback, &Callback::operator());
 }

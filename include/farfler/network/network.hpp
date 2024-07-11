@@ -32,10 +32,10 @@ class Network {
                             const T& message);
 
   template <typename T>
-  static void PublishAll(const std::string& topic, const T& message);
+  static void Publish(const std::string& topic, const T& message);
 
   template <typename T>
-  static void PublishAll(Network& network, const std::string& topic,
+  static void Publish(Network& network, const std::string& topic,
                          const T& message);
 
   template <typename Callback>
@@ -57,10 +57,10 @@ class Network {
                                       Callback callback);
 
   template <typename Callback>
-  static Subscription SubscribeAll(const std::string& topic, Callback callback);
+  static Subscription Subscribe(const std::string& topic, Callback callback);
 
   template <typename Callback>
-  static Subscription SubscribeAll(Network& network, const std::string& topic,
+  static Subscription Subscribe(Network& network, const std::string& topic,
                                    Callback callback);
 
   static void UnsubscribeOffline(const std::string& topic,
@@ -75,10 +75,10 @@ class Network {
   static void UnsubscribeOnline(Network& network, const std::string& topic,
                                 const Subscription& subscription);
 
-  static void UnsubscribeAll(const std::string& topic,
+  static void Unsubscribe(const std::string& topic,
                              const Subscription& subscription);
 
-  static void UnsubscribeAll(Network& network, const std::string& topic,
+  static void Unsubscribe(Network& network, const std::string& topic,
                              const Subscription& subscription);
 
  private:
