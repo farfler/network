@@ -77,6 +77,29 @@ Network::Subscribe(network2, "humidity", [](const double &humidity) {
 });
 ```
 
+<h2 id="singleton-instance-fallback">Singleton Instance Fallback</h2>
+
+Farfler Network implements a convenient singleton instance fallback mechanism. This feature allows you to use network operations without explicitly specifying a network instance, defaulting to the first created network instance. Here's how it works:
+
+```cxx
+// Create multiple network instances
+Network network1(io_context, "network1");
+Network network2(io_context, "network2");
+
+// The first created network (network1) becomes the default singleton instance
+
+// These operations will use network1 by default
+Network::Publish("temperature", 22.5);
+Network::Subscribe("humidity", [](const double &humidity) {
+  std::cout << "Humidity: " << humidity << "%" << std::endl;
+});
+
+// You can still explicitly specify a network when needed
+Network::Publish(network2, "pressure", 1013.25);
+```
+
+This mechanism allows you to write cleaner code when working with a single network or when one network is predominantly used, while still maintaining the ability to manage multiple networks when necessary.
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
 </p>
