@@ -1,5 +1,13 @@
 <h1 align="center">Farfler&trade; Network</h1>
 
+<p align="center">
+  <a href="#getting-started">Getting Started</a> &#xa0; | &#xa0;
+  <a href="#subscribing">Subscribing</a> &#xa0; | &#xa0;
+  <a href="#publishing">Publishing</a> &#xa0; | &#xa0;
+  <a href="#multiple-network-instances">Multiple Instances</a> &#xa0; | &#xa0;
+  <a href="#author">Author</a>
+</p>
+
 Farfler Network is a C++ library that implements a distributed publish-subscribe system using UDP for discovery and TCP for reliable communication. It allows nodes to discover each other, establish connections, and exchange messages on various topics.
 
 <h2 id="getting-started">Getting Started</h2>
@@ -100,6 +108,7 @@ Network::Publish(network2, "pressure", 1013.25);
 
 This mechanism allows you to write cleaner code when working with a single network or when one network is predominantly used, while still maintaining the ability to manage multiple networks when necessary.
 
-<p align="center">
+
+<p id="author" align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
 </p>
