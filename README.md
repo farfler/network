@@ -24,6 +24,24 @@ int main() {
 }
 ```
 
+<h2 id="subscribing">Subscribing</h2>
+
+Farfler Network offers flexible subscription options. You can subscribe to receive messages from all nodes with `Subscribe`, only from remote nodes with `SubscribeOnline`, or only from the local node with `SubscribeOffline`. This allows for fine-grained control over message reception. Here are examples of all three subscription types:
+
+```cxx
+Network::Subscribe("temperature", [](const double &message) {
+  std::cout << "Received temperature from any node: " << message << std::endl;
+});
+
+Network::SubscribeOnline("status", [](const bool &message) {
+  std::cout << "Received online status from remote node: " << message << std::endl;
+});
+
+Network::SubscribeOffline("position", [](const Vector3 &message) {
+  std::cout << "Received local position: (" << message.x << ", " << message.y << ", " << message.z << ")" << std::endl;
+});
+```
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
 </p>
