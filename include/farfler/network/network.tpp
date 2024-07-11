@@ -3,7 +3,7 @@ namespace farfler::network {
 template <typename T>
 void Network::PublishOffline(const std::string& topic, const T& message) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
@@ -13,7 +13,7 @@ void Network::PublishOffline(const std::string& topic, const T& message) {
 template <typename T>
 void Network::PublishOffline(Network& network, const std::string& topic,
                              const T& message) {
-  std::vector<char> serialized = T::Serialize(message);
+  std::vector<char> serialized = Serialize(message);
   std::lock_guard<std::mutex> lock(network.pubsub_mutex_);
   network.pubsub_.PublishOffline(topic, serialized);
 }
@@ -21,7 +21,7 @@ void Network::PublishOffline(Network& network, const std::string& topic,
 template <typename T>
 void Network::PublishOnline(const std::string& topic, const T& message) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
@@ -31,7 +31,7 @@ void Network::PublishOnline(const std::string& topic, const T& message) {
 template <typename T>
 void Network::PublishOnline(Network& network, const std::string& topic,
                             const T& message) {
-  std::vector<char> serialized = T::Serialize(message);
+  std::vector<char> serialized = Serialize(message);
   std::lock_guard<std::mutex> lock(network.tcp_sockets_mutex_);
   for (const auto& [id, socket] : network.connecting_tcp_sockets_) {
     network.SendPublication(socket, topic, serialized);
@@ -41,7 +41,7 @@ void Network::PublishOnline(Network& network, const std::string& topic,
 template <typename T>
 void Network::PublishAll(const std::string& topic, const T& message) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
@@ -64,7 +64,7 @@ Subscription Network::SubscribeOfflineImpl(Network& network,
   return network.pubsub_.SubscribeOffline(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
-        T deserialized = T::Deserialize(mutable_serialized);
+        T deserialized = Deserialize<T>(mutable_serialized);
         callback(deserialized);
       });
 }
@@ -78,7 +78,7 @@ Subscription Network::SubscribeOnlineImpl(Network& network,
   Subscription subscription = network.pubsub_.SubscribeOnline(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
-        T deserialized = T::Deserialize(mutable_serialized);
+        T deserialized = Deserialize<T>(mutable_serialized);
         callback(deserialized);
       });
   network.BroadcastSubscriptionUpdate();
@@ -94,7 +94,7 @@ Subscription Network::SubscribeAllImpl(Network& network,
   Subscription subscription = network.pubsub_.SubscribeAll(
       topic, [callback](const std::vector<char>& serialized) {
         std::vector<char> mutable_serialized = serialized;
-        T deserialized = T::Deserialize(mutable_serialized);
+        T deserialized = Deserialize<T>(mutable_serialized);
         callback(deserialized);
       });
   network.BroadcastSubscriptionUpdate();
@@ -105,7 +105,7 @@ template <typename Callback>
 Subscription Network::SubscribeOffline(const std::string& topic,
                                        Callback callback) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return Subscription();
   }
 
@@ -123,7 +123,7 @@ template <typename Callback>
 Subscription Network::SubscribeOnline(const std::string& topic,
                                       Callback callback) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return Subscription();
   }
 
@@ -141,7 +141,7 @@ template <typename Callback>
 Subscription Network::SubscribeAll(const std::string& topic,
                                    Callback callback) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return Subscription();
   }
 

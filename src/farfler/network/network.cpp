@@ -407,7 +407,7 @@ void Network::BroadcastSubscriptionUpdate() {
 void Network::UnsubscribeOffline(const std::string& topic,
                                  const Subscription& subscription) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
@@ -423,7 +423,7 @@ void Network::UnsubscribeOffline(Network& network, const std::string& topic,
 void Network::UnsubscribeOnline(const std::string& topic,
                                 const Subscription& subscription) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 
@@ -440,7 +440,7 @@ void Network::UnsubscribeOnline(Network& network, const std::string& topic,
 void Network::UnsubscribeAll(const std::string& topic,
                              const Subscription& subscription) {
   if (!instance) {
-    std::cout << "Intialize a network instance first" << std::endl;
+    std::cout << "Initialize a network instance first" << std::endl;
     return;
   }
 

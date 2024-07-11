@@ -154,4 +154,5 @@ class Network {
 
 }  // namespace farfler::network
 
+#include "serialization.tpp"
 #include "network.tpp"
