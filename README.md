@@ -54,6 +54,29 @@ Network::PublishOnline("status", true);
 Network::PublishOffline("position", Vector3(1.0, 2.0, 3.0));
 ```
 
+<h2 id="multiple-network-instances">Multiple Network Instances</h2>
+
+The library supports the creation and management of multiple independent network instances within a single application. This feature is particularly useful for scenarios where you need to isolate different parts of your network communication or manage distinct network configurations. Here's how you can work with multiple network instances:
+
+```cxx
+// Create multiple network instances
+Network network1(io_context, "network1");
+Network network2(io_context, "network2");
+
+// Publish to specific networks
+Network::Publish(network1, "temperature", 22.5);
+Network::Publish(network2, "humidity", 45.0);
+
+// Subscribe to topics on specific networks
+Network::Subscribe(network1, "temperature", [](const double &temp) {
+  std::cout << "Network1 temperature: " << temp << " °C" << std::endl;
+});
+
+Network::Subscribe(network2, "humidity", [](const double &humidity) {
+  std::cout << "Network2 humidity: " << humidity << "%" << std::endl;
+});
+```
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
 </p>
