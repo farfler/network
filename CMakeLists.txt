@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(farfler_network)
 
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 add_library(network STATIC src/farfler/network/types.cpp
                            src/farfler/network/pubsub.cpp
@@ -24,4 +25,12 @@ if(BUILD_PYTHON_BINDINGS)
     target_include_directories(farfler_network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
     set_target_properties(farfler_network PROPERTIES OUTPUT_NAME "farfler_network")
+endif()
+
+if(BUILD_EXAMPLES)
+    add_executable(example_publisher examples/publisher.cpp)
+    target_link_libraries(example_publisher PRIVATE network)
+    
+    add_executable(example_subscriber examples/subscriber.cpp)
+    target_link_libraries(example_subscriber PRIVATE network)
 endif()
