@@ -12,6 +12,16 @@ Farfler Network is a C++ library that implements a distributed publish-subscribe
 
 <h2 id="getting-started">Getting Started</h2>
 
+To install Farfler Network, you need to clone the repository and build the library using CMake. Here's how you can do it:
+
+```bash
+git clone https://github.com/farfler/network
+cd network
+mkdir build
+cd build
+cmake .. && make
+```
+
 To begin using Farfler Network, you need to set up the basic network infrastructure. This involves creating an IO context, initializing the network with a node name, and running the IO context in a separate thread. Here's how to set up the basic environment:
 
 ```cxx
@@ -107,7 +117,6 @@ Network::Publish(network2, "pressure", 1013.25);
 ```
 
 This mechanism allows you to write cleaner code when working with a single network or when one network is predominantly used, while still maintaining the ability to manage multiple networks when necessary.
-
 
 <p id="author" align="center">
   Made with ❤️ by <a href="https://github.com/danielbacsur" target="_blank">Daniel Bacsur</a>
