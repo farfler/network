@@ -4,16 +4,22 @@
 #include <boost/asio.hpp>
 #include <farfler/network/network.hpp>
 #include <farfler/network/types.hpp>
+#include <thread>
 
 namespace py = pybind11;
 using namespace farfler::network;
 
 class PyIOContext {
 public:
-  PyIOContext() : io_context_(), work_(boost::asio::make_work_guard(io_context_)) {}
+  PyIOContext() : io_context_(), work_(boost::asio::make_work_guard(io_context_)) {
+    thread_ = std::thread([this]() { this->io_context_.run(); });
+  }
   
-  void run() {
-    io_context_.run();
+  ~PyIOContext() {
+    stop();
+    if (thread_.joinable()) {
+      thread_.join();
+    }
   }
   
   void stop() {
@@ -27,6 +33,7 @@ public:
 private:
   boost::asio::io_context io_context_;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_;
+  std::thread thread_;
 };
 
 class PyNetwork {
@@ -59,7 +66,6 @@ private:
 PYBIND11_MODULE(farfler_network, m) {
   py::class_<PyIOContext>(m, "IOContext")
       .def(py::init<>())
-      .def("run", &PyIOContext::run)
       .def("stop", &PyIOContext::stop);
 
   py::class_<PyNetwork>(m, "Network")
